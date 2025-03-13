@@ -514,6 +514,23 @@
     .button-content i {
       margin-right: 8px;
     }
+    
+    /* 優化移動端數字輸入體驗 */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    
+    @media (max-width: 480px) {
+      input[type="number"] {
+        font-size: 16px; /* 防止iOS自動縮放 */
+      }
+    }
   </style>
 </head>
 <body>
@@ -532,10 +549,26 @@
       <!-- 球號範圍選擇 -->
       <div class="number-range-selector">
         <label for="start-number">最小號:</label>
-        <el-input-number v-model="startNumber" :min="1" :max="99" placeholder="起始號" style="margin-left: 10px;"></el-input-number>
+        <el-input-number 
+          v-model="startNumber" 
+          :min="1" 
+          :max="99" 
+          placeholder="起始號" 
+          style="margin-left: 10px;"
+          controls-position="right"
+          :input-props="{ inputmode: 'numeric', pattern: '[0-9]*' }">
+        </el-input-number>
         
         <label for="end-number">最大號:</label>
-        <el-input-number v-model="endNumber" :min="1" :max="99" placeholder="截止號" style="margin-left: 10px;"></el-input-number>
+        <el-input-number 
+          v-model="endNumber" 
+          :min="1" 
+          :max="99" 
+          placeholder="截止號" 
+          style="margin-left: 10px;"
+          controls-position="right"
+          :input-props="{ inputmode: 'numeric', pattern: '[0-9]*' }">
+        </el-input-number>
       </div>
       
       <!-- 操作按鈕 -->
@@ -566,9 +599,18 @@
       
       <!-- 已開出球號輸入區 -->
       <div class="el-form-item">
-        <label class="el-form-item__label">輸入已開出球號:</label>
         <div class="el-form-item__content">
-          <el-input v-model="newDrawnNumber" type="number" min="1" max="99" placeholder="輸入球號" @keyup.enter="addDrawnNumber" class="ball-input"></el-input>
+          <el-input 
+            v-model="newDrawnNumber" 
+            type="number" 
+            min="1" 
+            max="99" 
+            placeholder="輸入球號" 
+            @keyup.enter="addDrawnNumber" 
+            class="ball-input"
+            inputmode="numeric"
+            pattern="[0-9]*">
+          </el-input>
           <div class="button-group">
             <el-button type="primary" @click="addDrawnNumber" class="add-button">新增</el-button>
             <el-button type="danger" @click="clearDrawnNumbers" class="clear-button">清空已開球號</el-button>
