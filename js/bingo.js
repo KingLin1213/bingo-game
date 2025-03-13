@@ -1,4 +1,4 @@
-const { createApp, ref, computed, reactive } = Vue;
+const { createApp, ref, computed, reactive, nextTick } = Vue;
 
 createApp({
   setup() {
@@ -44,8 +44,15 @@ createApp({
     
     // 判斷某格是否已匹配
     const isMatched = (index) => {
+      // 免費格始終視為已匹配
       if (isFreeCell(index)) return true;
-      return drawnNumbers.value.includes(bingoCard.value[index]) && bingoCard.value[index] !== '';
+      
+      // 確保有格子值且其值存在於已開出球號中
+      const cellValue = bingoCard.value[index];
+      if (cellValue === '') return false;
+      
+      // 精確比較: 將格子值和已開出球號都轉為字符串再比較
+      return drawnNumbers.value.some(num => String(num) === String(cellValue));
     };
     
     // 判斷某個球號是否在賓果卡中
@@ -98,14 +105,29 @@ createApp({
         // 添加到新匹配列表,顯示動畫效果
         newMatches.value.push(index);
         
-        // 2秒後清除新匹配標記
+        // 添加視覺反饋
+        nextTick(() => {
+          const cells = document.querySelectorAll('.bingo-cell');
+          if (cells[index]) {
+            cells[index].classList.add('highlight-match');
+            
+            setTimeout(() => {
+              cells[index].classList.remove('highlight-match');
+            }, 1000);
+          }
+        });
+        
+        // 3秒後清除新匹配標記,但保留匹配狀態
         setTimeout(() => {
           const idx = newMatches.value.indexOf(index);
           if (idx > -1) {
             newMatches.value.splice(idx, 1);
           }
-        }, 2000);
+        }, 3000);
       }
+      
+      // 檢查是否連線
+      checkBingo();
     };
     
     // 切換已開出球號
@@ -122,23 +144,55 @@ createApp({
       const num = parseInt(newDrawnNumber.value);
       if (num && num >= 1 && num <= 99) {
         if (!drawnNumbers.value.includes(num)) {
+          // 添加新號碼到開出球號列表
           drawnNumbers.value.push(num);
           drawnNumbers.value.sort((a, b) => a - b);
           newDrawnNumber.value = '';
           
+          // 清空之前的新匹配列表
+          newMatches.value = [];
+          
           // 檢查賓果卡上是否有匹配的數字
+          let hasMatch = false;
           bingoCard.value.forEach((cell, index) => {
             if (cell === num.toString() && !isFreeCell(index)) {
-              // 將匹配的格子標示為已匹配
+              // 將匹配的格子標示為新匹配
               newMatches.value.push(index);
+              hasMatch = true;
               
               // 顯示匹配提示
               showMatchNotification(num);
             }
           });
+
+          // 自動檢查是否連線
+          checkBingo(); 
           
-          checkBingo(); // 自動檢查是否連線
+          // 更新視圖，確保所有匹配項都顯示勾選圖示
+          nextTick(() => {
+            // 對所有匹配的格子應用動畫效果
+            const cells = document.querySelectorAll('.bingo-cell');
+            bingoCard.value.forEach((cell, index) => {
+              if (isMatched(index) && !isFreeCell(index)) {
+                if (cells[index]) {
+                  // 對新匹配的格子應用特殊動畫
+                  if (newMatches.value.includes(index)) {
+                    cells[index].classList.add('highlight-match');
+                    setTimeout(() => {
+                      cells[index].classList.remove('highlight-match');
+                    }, 1000);
+                  }
+                }
+              }
+            });
+          });
+          
+          // 3秒後清除新匹配標記，但保留匹配狀態
+          setTimeout(() => {
+            newMatches.value = [];
+          }, 3000);
         } else {
+          // 號碼已存在於開出列表中，清空輸入
           newDrawnNumber.value = '';
         }
       }
