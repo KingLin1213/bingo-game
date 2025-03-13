@@ -206,6 +206,8 @@
       display: flex;
       justify-content: space-between;
       margin-top: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     
     .el-form-item__content {
@@ -287,6 +289,22 @@
       .button-group {
         margin-left: 10px;
         margin-top: 0;
+      }
+      
+      .action-buttons {
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: space-between;
+      }
+      
+      .action-buttons .el-button {
+        width: calc(50% - 5px) !important;
+        margin: 0;
+      }
+      
+      .generate-button, .reset-button {
+        width: calc(50% - 5px) !important;
+        flex: 0 0 calc(50% - 5px);
       }
     }
     
@@ -409,6 +427,23 @@
         font-size: 14px;
         margin: 4px;
       }
+      
+      .action-buttons {
+        gap: 12px;
+        flex-direction: column;
+      }
+      
+      .action-buttons .el-button {
+        width: 100%;
+        margin: 0;
+        height: 44px;
+        font-size: 16px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
     }
     
     @media (min-width: 481px) and (max-width: 768px) {
@@ -457,7 +492,6 @@
     
     .generate-button, .reset-button {
       transition: all 0.3s;
-      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -496,6 +530,10 @@
       
       .generate-button i, .reset-button i {
         margin-right: 8px;
+      }
+      
+      .generate-button, .reset-button {
+        width: 100%;
       }
     }
     
@@ -571,7 +609,7 @@
       <!-- 操作按鈕 -->
       <div class="action-buttons">
         <el-button type="success" @click="generateRandomCard" size="large" class="generate-button">
-          <span class="button-content"><i class="fas fa-random"></i> 隨機生成賓果卡</span>
+          <span class="button-content"><i class="fas fa-random"></i> 隨機產生賓果卡</span>
         </el-button>
         <el-button type="danger" @click="resetCard" size="large" class="reset-button">
           <span class="button-content"><i class="fas fa-trash-alt"></i> 重置賓果卡</span>
