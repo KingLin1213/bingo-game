@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>賓果對獎器</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f7fa;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #409EFF;
+      margin-bottom: 20px;
+    }
+    
+    .card-size-selector,
+    .number-range-selector,
+    .action-buttons,
+    .el-form-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .card-size-selector label,
+    .number-range-selector label,
+    .el-form-item__label {
+      margin-right: 10px;
+    }
+    
+    .bingo-card {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-gap: 8px;
+      max-width: 100%;
+      margin: 0 auto 20px;
+    }
+    
+    .bingo-cell {
+      position: relative;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      transition: all 0.3s;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .bingo-cell.matched {
+      background-color: #ff4d4f;
+      border-color: #ff4d4f;
+    }
+    
+    .bingo-cell .number {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    
+    .bingo-cell.matched .number {
+      color: white;
+    }
+    
+    .bingo-cell .check-mark {
+      position: absolute;
+      top: 1px;
+      right: 1px;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+      background-color: #ff4d4f;
+      border-radius: 50%;
+      opacity: 1;
+      transition: all 0.3s;
+      z-index: 2;
+      border: 1px solid white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .bingo-cell.matched .check-mark {
+      font-size: 12px;
+      opacity: 1;
+      transition: all 0.3s;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    
+    .bingo-cell.new-match .check-mark {
+      animation: pulse 0.5s ease-in-out;
+    }
+    
+    .bingo-cell input {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      outline: none;
+      background: transparent;
+      cursor: text;
+      padding: 0;
+    }
+    
+    .drawn-numbers {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f0f9eb;
+      border-radius: 4px;
+      border: 1px solid #e1f3d8;
+    }
+    
+    .drawn-numbers-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #67c23a;
+    }
+    
+    .drawn-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      margin: 4px;
+      border-radius: 50%;
+      background-color: #409EFF;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .drawn-number.matched {
+      background-color: #67c23a;
+      position: relative;
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(103, 194, 58, 0.5);
+    }
+    
+    .drawn-number.matched::after {
+      content: "\f00c";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      font-size: 10px;
+      color: white;
+      background-color: #67c23a;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid white;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .bingo-lines {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f0f2f5;
+      border-radius: 4px;
+    }
+    
+    .bingo-line {
+      margin-bottom: 5px;
+      padding: 8px;
+      background-color: #ecf5ff;
+      border-radius: 4px;
+      border: 1px solid #d9ecff;
+    }
+    
+    .bingo-line.completed {
+      background-color: #f0f9eb;
+      border-color: #e1f3d8;
+      color: #67c23a;
+      font-weight: bold;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    .el-form-item__content {
+      display: flex;
+      align-items: center;
+    }
+    
+    .free-cell {
+      background-color: #fdf6ec;
+      color: #e6a23c;
+      font-size: 14px;
+    }
+    
+    .free-cell .number::before {
+      content: "FREE";
+    }
+    
+    .free-cell.matched {
+      background-color: #67c23a;
+    }
+    
+    .free-cell.matched .number {
+      color: white;
+    }
+    
+    .match-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #67c23a;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s;
+    }
+    
+    .match-notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .feature-tips {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #ecf5ff;
+      border-radius: 4px;
+      border: 1px solid #d9ecff;
+    }
+    
+    .feature-tips h4 {
+      margin-top: 0;
+      color: #409EFF;
+    }
+    
+    .feature-tips ul {
+      margin-bottom: 0;
+      padding-left: 20px;
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .bingo-card {
+        grid-gap: 4px;
+      }
+      
+      .bingo-cell {
+        font-size: 14px;
+      }
+      
+      .card-size-selector,
+      .number-range-selector,
+      .action-buttons,
+      .el-form-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .card-size-selector label,
+      .number-range-selector label,
+      .el-form-item__label {
+        margin-bottom: 5px;
+      }
+    }
+    
+    @media (min-width: 481px) and (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .bingo-card {
+        grid-gap: 6px;
+      }
+      
+      .bingo-cell {
+        font-size: 15px;
+      }
+    }
+    
+    @media (min-width: 769px) {
+      .container {
+        padding: 20px;
+      }
+      
+      .bingo-card {
+        grid-gap: 8px;
+      }
+      
+      .bingo-cell {
+        font-size: 16px;
+      }
+    }
+    
+    @keyframes check-pop {
+      0% { transform: scale(0); }
+      60% { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+    
+    .highlight-match .check-mark {
+      animation: check-pop 0.5s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>賓果對獎</h1>
+      
+      <!-- 賓果卡大小選擇 -->
+      <div class="card-size-selector">
+        <label for="card-size">賓果卡大小:</label>
+        <el-select v-model="cardSize" placeholder="選擇大小" @change="updateCardSize" style="width: 120px; margin-left: 10px;">
+          <el-option v-for="size in availableSizes" :key="size" :label="`${size} x ${size}`" :value="size"></el-option>
+        </el-select>
+      </div>
+
+      <!-- 球號範圍選擇 -->
+      <div class="number-range-selector">
+        <label for="start-number">最小號:</label>
+        <el-input-number v-model="startNumber" :min="1" :max="99" placeholder="起始號" style="margin-left: 10px;"></el-input-number>
+        
+        <label for="end-number">最大號:</label>
+        <el-input-number v-model="endNumber" :min="1" :max="99" placeholder="截止號" style="margin-left: 10px;"></el-input-number>
+      </div>
+      
+      <!-- 操作按鈕 -->
+      <div class="action-buttons">
+        <el-button type="success" @click="generateRandomCard">隨機生成賓果卡</el-button>
+        <el-button type="danger" @click="resetCard">重置賓果卡</el-button>
+      </div>
+      
+      <!-- 賓果卡 -->
+      <div class="bingo-card" :style="{ gridTemplateColumns: `repeat(${cardSize}, 1fr)` }">
+        <div v-for="(cell, index) in bingoCard" :key="index" 
+             :class="['bingo-cell', {'matched': isMatched(index)}, {'free-cell': isFreeCell(index)}, {'new-match': newMatches.includes(index)}]"
+             @click="toggleCellMark(index)">
+          <div class="number">
+            <input v-if="!isFreeCell(index)" type="number" v-model="bingoCard[index]" min="1" max="99" 
+                  @input="validateInput($event, index)" @click.stop>
+          </div>
+          <!-- 勾選標記 - 右上角 -->
+          <div class="check-mark" v-if="newMatches.includes(index)">
+            <i class="fas fa-check"></i>
+          </div>
+        </div>
+      </div>
+      
+
+      
+      <!-- 已開出球號輸入區 -->
+      <div class="el-form-item">
+        <label class="el-form-item__label">輸入已開出球號:</label>
+        <div class="el-form-item__content">
+          <el-input v-model="newDrawnNumber" type="number" min="1" max="99" placeholder="輸入球號" @keyup.enter="addDrawnNumber"></el-input>
+          <el-button type="primary" style="margin-left: 10px;" @click="addDrawnNumber">新增</el-button>
+          <el-button type="danger" style="margin-left: 10px;" @click="clearDrawnNumbers">清空已開球號</el-button>
+        </div>
+      </div>
+      
+      <!-- 已開出球號顯示區 -->
+      <div class="drawn-numbers">
+        <div class="drawn-numbers-title">已開出球號 ({{ drawnNumbers.length }}個):</div>
+        <div v-if="drawnNumbers.length > 0">
+          <div v-for="number in drawnNumbers" :key="number"
+               :class="['drawn-number', {'matched': isNumberInCard(number)}]"
+               @click="toggleDrawnNumber(number)">
+            {{ number }}
+          </div>
+        </div>
+        <div v-else>尚未有開出的球號</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="bingo.js"></script>
+</body>
+</html> 
