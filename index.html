@@ -280,17 +280,65 @@
       padding-left: 20px;
     }
     
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .ball-input {
+      flex: 1;
+    }
+    
+    .add-button, .clear-button {
+      flex-shrink: 0;
+    }
+    
+    @media (min-width: 768px) {
+      .button-group {
+        margin-left: 10px;
+        margin-top: 0;
+      }
+    }
+    
     @media (max-width: 480px) {
+      .button-group {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+      
+      .add-button, .clear-button {
+        flex: 1;
+        height: 40px;
+        font-size: 14px;
+      }
+      
       .container {
         padding: 10px;
+        max-width: 100%;
+      }
+      
+      h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
       }
       
       .bingo-card {
-        grid-gap: 4px;
+        grid-gap: 5px;
+        margin-bottom: 20px;
       }
       
       .bingo-cell {
-        font-size: 14px;
+        font-size: 16px;
+        min-height: 36px;
+      }
+      
+      .bingo-cell input {
+        font-size: 16px;
+        width: 100%;
+        height: 100%;
+        padding: 5px 0;
       }
       
       .card-size-selector,
@@ -299,12 +347,78 @@
       .el-form-item {
         flex-direction: column;
         align-items: flex-start;
+        margin-bottom: 20px;
+        width: 100%;
       }
       
       .card-size-selector label,
       .number-range-selector label,
       .el-form-item__label {
-        margin-bottom: 5px;
+        margin-bottom: 10px;
+        width: 100%;
+        font-size: 15px;
+        font-weight: bold;
+      }
+      
+      .el-select,
+      .el-input-number {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-bottom: 12px;
+        height: 40px;
+      }
+      
+      .action-buttons {
+        gap: 12px;
+      }
+      
+      .action-buttons .el-button {
+        width: 100%;
+        margin-bottom: 0;
+        height: 44px;
+        font-size: 16px;
+      }
+      
+      .el-form-item__content {
+        flex-wrap: wrap;
+        width: 100%;
+      }
+      
+      .el-form-item__content .el-input {
+        width: 100%;
+        margin-bottom: 0;
+      }
+      
+      .el-form-item__content .el-input .el-input__inner {
+        height: 40px;
+        font-size: 16px;
+      }
+      
+      .el-form-item__content .el-button {
+        margin-left: 0 !important;
+        margin-right: 8px;
+        margin-bottom: 0;
+        height: 40px;
+      }
+      
+      .drawn-numbers {
+        padding: 12px;
+        margin-top: 20px;
+        text-align: center;
+        border-radius: 8px;
+      }
+      
+      .drawn-numbers-title {
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      
+      .drawn-number {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+        margin: 4px;
       }
     }
     
@@ -345,6 +459,61 @@
     .highlight-match .check-mark {
       animation: check-pop 0.5s ease-out;
     }
+    
+    .generate-button, .reset-button {
+      transition: all 0.3s;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .generate-button i, .reset-button i {
+      margin-right: 8px;
+    }
+    
+    .generate-button:hover {
+      transform: scale(1.02);
+      box-shadow: 0 2px 10px rgba(103, 194, 58, 0.3);
+    }
+    
+    .reset-button:hover {
+      transform: scale(1.02);
+      box-shadow: 0 2px 10px rgba(245, 108, 108, 0.3);
+    }
+    
+    @media (max-width: 480px) {
+      .action-buttons {
+        gap: 12px;
+        flex-direction: column;
+      }
+      
+      .action-buttons .el-button {
+        width: 100%;
+        margin: 0;
+        height: 44px;
+        font-size: 16px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .generate-button i, .reset-button i {
+        margin-right: 8px;
+      }
+    }
+    
+    .button-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+    
+    .button-content i {
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -371,8 +540,12 @@
       
       <!-- 操作按鈕 -->
       <div class="action-buttons">
-        <el-button type="success" @click="generateRandomCard">隨機生成賓果卡</el-button>
-        <el-button type="danger" @click="resetCard">重置賓果卡</el-button>
+        <el-button type="success" @click="generateRandomCard" size="large" class="generate-button">
+          <span class="button-content"><i class="fas fa-random"></i> 隨機生成賓果卡</span>
+        </el-button>
+        <el-button type="danger" @click="resetCard" size="large" class="reset-button">
+          <span class="button-content"><i class="fas fa-trash-alt"></i> 重置賓果卡</span>
+        </el-button>
       </div>
       
       <!-- 賓果卡 -->
@@ -382,24 +555,24 @@
              @click="toggleCellMark(index)">
           <div class="number">
             <input v-if="!isFreeCell(index)" type="number" v-model="bingoCard[index]" min="1" max="99" 
-                  @input="validateInput($event, index)" @click.stop>
+                  @input="validateInput($event, index)" @click.stop inputmode="numeric" pattern="[0-9]*">
           </div>
           <!-- 勾選標記 - 右上角 -->
-          <div class="check-mark" v-if="newMatches.includes(index)">
+          <div class="check-mark" v-if="isMatched(index) && !isFreeCell(index)">
             <i class="fas fa-check"></i>
           </div>
         </div>
       </div>
       
-
-      
       <!-- 已開出球號輸入區 -->
       <div class="el-form-item">
         <label class="el-form-item__label">輸入已開出球號:</label>
         <div class="el-form-item__content">
-          <el-input v-model="newDrawnNumber" type="number" min="1" max="99" placeholder="輸入球號" @keyup.enter="addDrawnNumber"></el-input>
-          <el-button type="primary" style="margin-left: 10px;" @click="addDrawnNumber">新增</el-button>
-          <el-button type="danger" style="margin-left: 10px;" @click="clearDrawnNumbers">清空已開球號</el-button>
+          <el-input v-model="newDrawnNumber" type="number" min="1" max="99" placeholder="輸入球號" @keyup.enter="addDrawnNumber" class="ball-input"></el-input>
+          <div class="button-group">
+            <el-button type="primary" @click="addDrawnNumber" class="add-button">新增</el-button>
+            <el-button type="danger" @click="clearDrawnNumbers" class="clear-button">清空已開球號</el-button>
+          </div>
         </div>
       </div>
       
