@@ -199,8 +199,82 @@ createApp({
     
     // 檢查賓果連線
     const checkBingo = () => {
-      // 檢查橫向、縱向和對角線連線的邏輯
-      // ...
+      const size = cardSize.value;
+      let hasLine = false;
+      const matched = [];
+      
+      // 獲取所有已匹配的格子索引
+      bingoCard.value.forEach((cell, index) => {
+        if (isMatched(index)) {
+          matched.push(index);
+        }
+      });
+      
+      // 檢查橫向連線
+      for (let row = 0; row < size; row++) {
+        let rowMatched = true;
+        for (let col = 0; col < size; col++) {
+          const index = row * size + col;
+          if (!matched.includes(index)) {
+            rowMatched = false;
+            break;
+          }
+        }
+        if (rowMatched) {
+          hasLine = true;
+          console.log(`橫向連線: 第 ${row + 1} 行`);
+        }
+      }
+      
+      // 檢查縱向連線
+      for (let col = 0; col < size; col++) {
+        let colMatched = true;
+        for (let row = 0; row < size; row++) {
+          const index = row * size + col;
+          if (!matched.includes(index)) {
+            colMatched = false;
+            break;
+          }
+        }
+        if (colMatched) {
+          hasLine = true;
+          console.log(`縱向連線: 第 ${col + 1} 列`);
+        }
+      }
+      
+      // 檢查左上到右下的對角線
+      let diag1Matched = true;
+      for (let i = 0; i < size; i++) {
+        const index = i * size + i;
+        if (!matched.includes(index)) {
+          diag1Matched = false;
+          break;
+        }
+      }
+      if (diag1Matched) {
+        hasLine = true;
+        console.log('對角線連線: 左上到右下');
+      }
+      
+      // 檢查右上到左下的對角線
+      let diag2Matched = true;
+      for (let i = 0; i < size; i++) {
+        const index = i * size + (size - 1 - i);
+        if (!matched.includes(index)) {
+          diag2Matched = false;
+          break;
+        }
+      }
+      if (diag2Matched) {
+        hasLine = true;
+        console.log('對角線連線: 右上到左下');
+      }
+      
+      if (hasLine) {
+        console.log('賓果!');
+      }
+      
+      return hasLine;
     };
     
     return {
